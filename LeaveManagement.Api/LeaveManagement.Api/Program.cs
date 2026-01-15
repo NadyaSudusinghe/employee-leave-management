@@ -1,4 +1,7 @@
 
+using LeaveManagement.Api.Data;
+using Microsoft.EntityFrameworkCore;
+
 namespace LeaveManagement.Api
 {
     public class Program
@@ -8,6 +11,12 @@ namespace LeaveManagement.Api
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
+
+            builder.Services.AddDbContext<ApplicationDbContext>(options => 
+                options.UseNpgsql(
+                    builder.Configuration.GetConnectionString("DefaultConnection")
+                )
+            );
 
             builder.Services.AddControllers();
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
