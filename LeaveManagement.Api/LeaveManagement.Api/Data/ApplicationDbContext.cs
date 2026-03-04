@@ -8,5 +8,7 @@ namespace LeaveManagement.Api.Data
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options): base(options) { }
 
         public DbSet<Employee> Employees => Set<Employee>();
+
+        public DbSet<LeaveRequest> LeaveRequests {  get; set; }
     }
 }
