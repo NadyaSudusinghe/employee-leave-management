@@ -89,6 +89,27 @@ namespace LeaveManagement.Api.Controllers
             });
         }
 
+        [HttpGet("employee/{employeeId}")]
+        public async Task<ActionResult<IEnumerable<LeaveRequestReadDto>>> GetLeaveRequestsByEmployeeId(int employeeId)
+        {
+            var leaveRequests = await _context.LeaveRequests.Where(lr => lr.EmployeeId == employeeId)
+               .Include(lr => lr.Employee).ToListAsync();
+
+            var result = leaveRequests.Select(lr => new LeaveRequestReadDto
+            {
+                Id = lr.Id,
+                StartDate = lr.StartDate,
+                EndDate = lr.EndDate,
+                Reason = lr.Reason,
+                Status = lr.Status,
+                EmployeeId = lr.EmployeeId,
+                EmployeeName = lr.Employee.FirstName + " " + lr.Employee.LastName
+            });
+
+            return Ok(result);
+
+        }
+
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateLeaveRequest(int id, LeaveRequestCreateDto dto)
         {
