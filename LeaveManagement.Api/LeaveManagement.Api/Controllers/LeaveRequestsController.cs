@@ -21,6 +21,9 @@ namespace LeaveManagement.Api.Controllers
         [HttpPost]
         public async Task<ActionResult<LeaveRequestReadDto>> CreateLeaveRequest(LeaveRequestCreateDto dto)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
             var employee = await _context.Employees.FindAsync(dto.EmployeeId);
 
             if (employee == null)
@@ -113,10 +116,18 @@ namespace LeaveManagement.Api.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateLeaveRequest(int id, LeaveRequestCreateDto dto)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
             var leaveRequest = await _context.LeaveRequests.FindAsync(id);
 
             if (leaveRequest == null)
                 return NotFound();
+
+            //check if employee exists as well.
+            var employeeExists = await _context.Employees.FindAsync(dto.EmployeeId);
+            if (employeeExists == null)
+                return BadRequest("Employee does not exist.");
 
             leaveRequest.StartDate = dto.StartDate.ToUniversalTime();
             leaveRequest.EndDate = dto.EndDate.ToUniversalTime();

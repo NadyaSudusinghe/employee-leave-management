@@ -4,16 +4,15 @@ namespace LeaveManagement.Api.DTOs
 {
     public class EmployeeUpdateDto
     {
-        [Required]
+        [Required(ErrorMessage = "First name is required.")]
         [MaxLength(100)]
         public string FirstName { get; set; } = string.Empty;
 
-        [Required]
+        [Required(ErrorMessage = "Last name is required.")]
         [MaxLength(100)]
         public string LastName { get; set; } = string.Empty;
 
-        [Required]
-        [MaxLength(150)]
+        [Required(ErrorMessage = "Email is required.")]
         [EmailAddress]
         public string Email { get; set; } = string.Empty;
     }

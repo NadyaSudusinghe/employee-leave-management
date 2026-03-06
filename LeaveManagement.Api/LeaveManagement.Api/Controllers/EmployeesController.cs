@@ -22,6 +22,15 @@ namespace LeaveManagement.Api.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateEmployee(EmployeeCreateDto employeeDto)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var emailExists = await _context.Employees
+                .AnyAsync(e => e.Email == employeeDto.Email);
+
+            if(emailExists)
+                return BadRequest("Email is already in use.");
+
             var employee = new Employee
             {
                 FirstName = employeeDto.FirstName,
@@ -47,7 +56,7 @@ namespace LeaveManagement.Api.Controllers
 
         //Get all records
         [HttpGet]
-        public async Task<IActionResult> GetAllEmployees()
+        public async Task<ActionResult<IEnumerable<EmployeeReadDto>>> GetAllEmployees()
         {
             var employees = await _context.Employees
                 .Select(e => new EmployeeReadDto
@@ -63,7 +72,7 @@ namespace LeaveManagement.Api.Controllers
 
         //Get By Id
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetEmployeeById(int id)
+        public async Task<ActionResult<EmployeeReadDto>> GetEmployeeById(int id)
         {
             var employee = await _context.Employees.FindAsync(id);
 
@@ -86,13 +95,19 @@ namespace LeaveManagement.Api.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateEmployee(int id, EmployeeUpdateDto updateDto)
         {
-            //if(id != updatedEmployee.Id)
-            //    return BadRequest("ID mismatch");
+            if(!ModelState.IsValid)
+                return BadRequest(ModelState);
 
             var existingEmployee = await _context.Employees.FindAsync(id);
 
             if (existingEmployee == null)
                 return NotFound();
+
+            var emailExists = await _context.Employees
+                .AnyAsync(e => e.Email == updateDto.Email && e.Id != id);
+
+            if (emailExists)
+                return BadRequest("Email is already in use.");
 
             existingEmployee.FirstName = updateDto.FirstName;
             existingEmployee.LastName = updateDto.LastName;
