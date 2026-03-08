@@ -1,5 +1,7 @@
 
 using LeaveManagement.Api.Data;
+using LeaveManagement.Api.Services;
+using LeaveManagement.Api.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace LeaveManagement.Api
@@ -21,6 +23,8 @@ namespace LeaveManagement.Api
             builder.Services.AddControllers();
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();
+
+            builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 
             var app = builder.Build();
 

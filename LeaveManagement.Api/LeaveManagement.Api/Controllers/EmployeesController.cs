@@ -1,6 +1,7 @@
 ﻿using LeaveManagement.Api.Data;
 using LeaveManagement.Api.DTOs;
 using LeaveManagement.Api.Models;
+using LeaveManagement.Api.Services.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -11,11 +12,11 @@ namespace LeaveManagement.Api.Controllers
     [ApiController]
     public class EmployeesController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IEmployeeService _employeeService;
 
-        public EmployeesController(ApplicationDbContext context)
+        public EmployeesController(IEmployeeService employeeService)
         {
-            _context = context;
+            _employeeService = employeeService;
         }
 
         //Create new Employee
@@ -25,70 +26,35 @@ namespace LeaveManagement.Api.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var emailExists = await _context.Employees
-                .AnyAsync(e => e.Email == employeeDto.Email);
-
-            if(emailExists)
-                return BadRequest("Email is already in use.");
-
-            var employee = new Employee
+            try
             {
-                FirstName = employeeDto.FirstName,
-                LastName = employeeDto.LastName,
-                Email = employeeDto.Email,
-                DateJoined = DateTime.UtcNow
-            };
-
-            _context.Employees.Add(employee);
-            await _context.SaveChangesAsync();
-
-            var readDto = new EmployeeReadDto
+                var employee = await _employeeService.CreateEmployee(employeeDto);
+                return CreatedAtAction(nameof(GetEmployeeById), new { id = employee.Id }, employee);
+            }
+            catch (InvalidOperationException ex)
             {
-                Id = employee.Id,
-                FirstName = employee.FirstName,
-                LastName = employee.LastName,
-                Email = employee.Email,
-                DateJoined = employee.DateJoined
-            };
-
-            return CreatedAtAction(nameof(GetEmployeeById), new { id = employee.Id }, readDto);
+                return BadRequest(ex.Message);
+            }
         }
 
         //Get all records
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<EmployeeReadDto>>> GetAllEmployees()
+        public async Task<IActionResult> GetAllEmployees()
         {
-            var employees = await _context.Employees
-                .Select(e => new EmployeeReadDto
-                {
-                    Id = e.Id,
-                    FirstName = e.FirstName,
-                    LastName = e.LastName,
-                    Email = e.Email,
-                    DateJoined = e.DateJoined
-                }).ToListAsync();
+            var employees = await _employeeService.GetAllEmployees();
             return Ok(employees);
         }
 
         //Get By Id
         [HttpGet("{id}")]
-        public async Task<ActionResult<EmployeeReadDto>> GetEmployeeById(int id)
+        public async Task<IActionResult> GetEmployeeById(int id)
         {
-            var employee = await _context.Employees.FindAsync(id);
+            var employee = await _employeeService.GetEmployeeById(id);
 
             if (employee == null)
                 return NotFound();
 
-            var readDto = new EmployeeReadDto
-            {
-                Id = employee.Id,
-                FirstName = employee.FirstName,
-                LastName = employee.LastName,
-                Email = employee.Email,
-                DateJoined = employee.DateJoined
-            };
-
-            return Ok(readDto);
+            return Ok(employee);
         }
 
         //Update Employe
@@ -98,37 +64,29 @@ namespace LeaveManagement.Api.Controllers
             if(!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var existingEmployee = await _context.Employees.FindAsync(id);
+            try
+            {
+                var updated = await _employeeService.UpdateEmployee(id, updateDto);
 
-            if (existingEmployee == null)
-                return NotFound();
+                if (!updated)
+                    return NotFound();
 
-            var emailExists = await _context.Employees
-                .AnyAsync(e => e.Email == updateDto.Email && e.Id != id);
-
-            if (emailExists)
-                return BadRequest("Email is already in use.");
-
-            existingEmployee.FirstName = updateDto.FirstName;
-            existingEmployee.LastName = updateDto.LastName;
-            existingEmployee.Email = updateDto.Email;
-
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+                return NoContent();
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         //Delete Employee
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteEmployee(int id)
         {
-            var employee = await _context.Employees.FindAsync(id);
+            var deleted = await _employeeService.DeleteEmployee(id);
 
-            if(employee == null)
+            if(!deleted)
                 return NotFound();
-
-            _context.Employees.Remove(employee);
-            await _context.SaveChangesAsync();
 
             return NoContent();
         }
