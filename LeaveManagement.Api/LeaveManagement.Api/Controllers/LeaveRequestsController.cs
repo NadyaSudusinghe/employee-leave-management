@@ -1,6 +1,7 @@
 ﻿using LeaveManagement.Api.Data;
 using LeaveManagement.Api.DTOs;
 using LeaveManagement.Api.Models;
+using LeaveManagement.Api.Services.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -11,105 +12,61 @@ namespace LeaveManagement.Api.Controllers
     [ApiController]
     public class LeaveRequestsController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        private readonly ILeaveRequestService _leaveRequestService;
 
-        public LeaveRequestsController(ApplicationDbContext context)
+        public LeaveRequestsController(ILeaveRequestService leaveRequestService)
         {
-            _context = context;
+            _leaveRequestService = leaveRequestService;
         }
 
         [HttpPost]
-        public async Task<ActionResult<LeaveRequestReadDto>> CreateLeaveRequest(LeaveRequestCreateDto dto)
+        public async Task<IActionResult> CreateLeaveRequest(LeaveRequestCreateDto dto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var employee = await _context.Employees.FindAsync(dto.EmployeeId);
-
-            if (employee == null)
-                return BadRequest("Employee does not Exist.");
-
-            var leaveRequest = new LeaveRequest
+            try
             {
-                StartDate = dto.StartDate,
-                EndDate = dto.EndDate,
-                Reason = dto.Reason,
-                EmployeeId = dto.EmployeeId,
-                Status = "Pending"
-            };
-
-            _context.LeaveRequests.Add(leaveRequest);
-            await _context.SaveChangesAsync();
-
-            return Ok(new LeaveRequestReadDto
+                var leaveRequest = await _leaveRequestService.CreateLeaveRequest(dto);
+                return Ok(leaveRequest);
+            }
+            catch (InvalidOperationException ex)
             {
-                Id = leaveRequest.Id,
-                StartDate = leaveRequest.StartDate,
-                EndDate = leaveRequest.EndDate,
-                Reason = leaveRequest.Reason,
-                Status = leaveRequest.Status,
-                EmployeeId = leaveRequest.EmployeeId,
-                EmployeeName = employee.FirstName + " " + employee.LastName
-            });
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<LeaveRequestReadDto>>> GetAllLeaveRequests()
+        public async Task<IActionResult> GetAllLeaveRequests()
         {
-            var leaveRequests = await _context.LeaveRequests
-                .Include(lr => lr.Employee).ToListAsync();
+            var leaveRequests = await _leaveRequestService.GetAllLeaveRequests();
 
-            var result = leaveRequests.Select(lr => new LeaveRequestReadDto
-            {
-                Id = lr.Id,
-                StartDate = lr.StartDate,
-                EndDate = lr.EndDate,
-                Reason = lr.Reason,
-                Status = lr.Status,
-                EmployeeId = lr.EmployeeId,
-                EmployeeName = lr.Employee.FirstName + " " + lr.Employee.LastName
-            });
-            return Ok(result);
+            return Ok(leaveRequests);
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<LeaveRequestReadDto>> GetLeaveRequestById(int id)
+        public async Task<IActionResult> GetLeaveRequestById(int id)
         {
-            var leaveRequest = await _context.LeaveRequests.Include(lr => lr.Employee).FirstOrDefaultAsync(lr => lr.Id == id); ;
+            var leaveRequest = await _leaveRequestService.GetLeaveRequestById(id);
 
             if (leaveRequest == null)
                 return NotFound();
 
-            return Ok(new LeaveRequestReadDto
-            {
-                Id = leaveRequest.Id,
-                StartDate = leaveRequest.StartDate,
-                EndDate = leaveRequest.EndDate,
-                Reason = leaveRequest.Reason,
-                Status = leaveRequest.Status,
-                EmployeeId = leaveRequest.EmployeeId,
-                EmployeeName = leaveRequest.Employee.FirstName + " " + leaveRequest.Employee.LastName
-            });
+            return Ok(leaveRequest);
         }
 
         [HttpGet("employee/{employeeId}")]
-        public async Task<ActionResult<IEnumerable<LeaveRequestReadDto>>> GetLeaveRequestsByEmployeeId(int employeeId)
+        public async Task<IActionResult> GetLeaveRequestsByEmployeeId(int employeeId)
         {
-            var leaveRequests = await _context.LeaveRequests.Where(lr => lr.EmployeeId == employeeId)
-               .Include(lr => lr.Employee).ToListAsync();
-
-            var result = leaveRequests.Select(lr => new LeaveRequestReadDto
+            try
             {
-                Id = lr.Id,
-                StartDate = lr.StartDate,
-                EndDate = lr.EndDate,
-                Reason = lr.Reason,
-                Status = lr.Status,
-                EmployeeId = lr.EmployeeId,
-                EmployeeName = lr.Employee.FirstName + " " + lr.Employee.LastName
-            });
-
-            return Ok(result);
+                var leaveRequests = await _leaveRequestService.GetLeaveRequestsByEmployeeId(employeeId);
+                return Ok(leaveRequests);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
 
         }
 
@@ -119,37 +76,27 @@ namespace LeaveManagement.Api.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var leaveRequest = await _context.LeaveRequests.FindAsync(id);
+            try
+            {
+                var updated = await _leaveRequestService.UpdateLeaveRequest(id, dto);
+                if (!updated)
+                    return NotFound();
 
-            if (leaveRequest == null)
-                return NotFound();
-
-            //check if employee exists as well.
-            var employeeExists = await _context.Employees.FindAsync(dto.EmployeeId);
-            if (employeeExists == null)
-                return BadRequest("Employee does not exist.");
-
-            leaveRequest.StartDate = dto.StartDate.ToUniversalTime();
-            leaveRequest.EndDate = dto.EndDate.ToUniversalTime();
-            leaveRequest.Reason = dto.Reason;
-            leaveRequest.EmployeeId = dto.EmployeeId;
-
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+                return NoContent();
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteLeaveRequest(int id)
         {
-            var leaveRequest = await _context.LeaveRequests.FindAsync(id);
-
-            if (leaveRequest == null)
+            var deleted = await _leaveRequestService.DeleteLeaveRequest(id);
+            if (!deleted)
                 return NotFound();
-
-            _context.LeaveRequests.Remove(leaveRequest);
-            await _context.SaveChangesAsync();
-
+            
             return NoContent();
         }
     }

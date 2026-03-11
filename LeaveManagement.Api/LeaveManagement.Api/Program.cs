@@ -25,6 +25,7 @@ namespace LeaveManagement.Api
             builder.Services.AddOpenApi();
 
             builder.Services.AddScoped<IEmployeeService, EmployeeService>();
+            builder.Services.AddScoped<ILeaveRequestService, LeaveRequestService>();
 
             var app = builder.Build();
 
