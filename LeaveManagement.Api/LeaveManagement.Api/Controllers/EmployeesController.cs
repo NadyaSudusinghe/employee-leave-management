@@ -2,6 +2,7 @@
 using LeaveManagement.Api.DTOs;
 using LeaveManagement.Api.Models;
 using LeaveManagement.Api.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -20,6 +21,7 @@ namespace LeaveManagement.Api.Controllers
         }
 
         //Create new Employee
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> CreateEmployee(EmployeeCreateDto employeeDto)
         {
@@ -38,6 +40,7 @@ namespace LeaveManagement.Api.Controllers
         }
 
         //Get all records
+        [Authorize]
         [HttpGet]
         public async Task<IActionResult> GetAllEmployees()
         {
@@ -46,6 +49,7 @@ namespace LeaveManagement.Api.Controllers
         }
 
         //Get By Id
+        [Authorize]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetEmployeeById(int id)
         {
@@ -58,6 +62,7 @@ namespace LeaveManagement.Api.Controllers
         }
 
         //Update Employe
+        [Authorize]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateEmployee(int id, EmployeeUpdateDto updateDto)
         {
@@ -80,6 +85,7 @@ namespace LeaveManagement.Api.Controllers
         }
 
         //Delete Employee
+        [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteEmployee(int id)
         {

@@ -10,5 +10,6 @@ namespace LeaveManagement.Api.Data
         public DbSet<Employee> Employees => Set<Employee>();
 
         public DbSet<LeaveRequest> LeaveRequests {  get; set; }
+        public DbSet<User> Users {  get; set; }
     }
 }

@@ -2,6 +2,7 @@
 using LeaveManagement.Api.DTOs;
 using LeaveManagement.Api.Models;
 using LeaveManagement.Api.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -19,6 +20,7 @@ namespace LeaveManagement.Api.Controllers
             _leaveRequestService = leaveRequestService;
         }
 
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> CreateLeaveRequest(LeaveRequestCreateDto dto)
         {
@@ -36,6 +38,7 @@ namespace LeaveManagement.Api.Controllers
             }
         }
 
+        [Authorize]
         [HttpGet]
         public async Task<IActionResult> GetAllLeaveRequests()
         {
@@ -44,6 +47,7 @@ namespace LeaveManagement.Api.Controllers
             return Ok(leaveRequests);
         }
 
+        [Authorize]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetLeaveRequestById(int id)
         {
@@ -55,6 +59,7 @@ namespace LeaveManagement.Api.Controllers
             return Ok(leaveRequest);
         }
 
+        [Authorize]
         [HttpGet("employee/{employeeId}")]
         public async Task<IActionResult> GetLeaveRequestsByEmployeeId(int employeeId)
         {
@@ -70,6 +75,7 @@ namespace LeaveManagement.Api.Controllers
 
         }
 
+        [Authorize]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateLeaveRequest(int id, LeaveRequestCreateDto dto)
         {
@@ -90,6 +96,7 @@ namespace LeaveManagement.Api.Controllers
             }
         }
 
+        [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteLeaveRequest(int id)
         {
