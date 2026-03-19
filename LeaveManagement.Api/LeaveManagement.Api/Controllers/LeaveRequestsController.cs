@@ -1,4 +1,5 @@
-﻿using LeaveManagement.Api.Data;
+﻿using LeaveManagement.Api.Common;
+using LeaveManagement.Api.Data;
 using LeaveManagement.Api.DTOs;
 using LeaveManagement.Api.Models;
 using LeaveManagement.Api.Services.Interfaces;
@@ -9,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace LeaveManagement.Api.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/leaverequests")]
     [ApiController]
     public class LeaveRequestsController : ControllerBase
     {
@@ -38,7 +39,7 @@ namespace LeaveManagement.Api.Controllers
             }
         }
 
-        [Authorize]
+        [Authorize(Roles = Roles.Admin)]
         [HttpGet]
         public async Task<IActionResult> GetAllLeaveRequests()
         {
@@ -96,7 +97,7 @@ namespace LeaveManagement.Api.Controllers
             }
         }
 
-        [Authorize]
+        [Authorize(Roles = Roles.Admin)]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteLeaveRequest(int id)
         {

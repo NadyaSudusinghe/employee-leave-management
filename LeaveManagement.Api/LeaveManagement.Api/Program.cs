@@ -31,6 +31,7 @@ namespace LeaveManagement.Api
             builder.Services.AddScoped<ILeaveRequestService, LeaveRequestService>();
             builder.Services.AddScoped<IJwtService, JwtService>();
             builder.Services.AddScoped<IAuthService, AuthService>();
+            builder.Services.AddScoped<IUserService, UserService>();
 
             var jwtKey = builder.Configuration["Jwt:Key"];
 

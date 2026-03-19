@@ -1,4 +1,5 @@
-﻿using LeaveManagement.Api.Data;
+﻿using LeaveManagement.Api.Common;
+using LeaveManagement.Api.Data;
 using LeaveManagement.Api.DTOs;
 using LeaveManagement.Api.Models;
 using LeaveManagement.Api.Services.Interfaces;
@@ -40,7 +41,7 @@ namespace LeaveManagement.Api.Controllers
         }
 
         //Get all records
-        [Authorize]
+        [Authorize(Roles = Roles.Admin)]
         [HttpGet]
         public async Task<IActionResult> GetAllEmployees()
         {
@@ -85,7 +86,7 @@ namespace LeaveManagement.Api.Controllers
         }
 
         //Delete Employee
-        [Authorize]
+        [Authorize(Roles = Roles.Admin)]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteEmployee(int id)
         {

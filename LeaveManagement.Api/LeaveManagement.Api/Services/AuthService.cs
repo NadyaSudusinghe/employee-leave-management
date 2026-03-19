@@ -1,4 +1,5 @@
-﻿using LeaveManagement.Api.Data;
+﻿using LeaveManagement.Api.Common;
+using LeaveManagement.Api.Data;
 using LeaveManagement.Api.DTOs.Auth;
 using LeaveManagement.Api.Models;
 using LeaveManagement.Api.Services.Interfaces;
@@ -29,7 +30,8 @@ namespace LeaveManagement.Api.Services
             var user = new User
             {
                 Email = dto.Email,
-                PasswordHash = passwordHash
+                PasswordHash = passwordHash,
+                Role = dto.Role ?? Roles.User
             };
 
             _context.Users.Add(user);
