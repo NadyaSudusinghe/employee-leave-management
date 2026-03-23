@@ -97,6 +97,9 @@ namespace LeaveManagement.Api.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<int?>("EmployeeId")
+                        .HasColumnType("integer");
+
                     b.Property<string>("PasswordHash")
                         .IsRequired()
                         .HasColumnType("text");
@@ -106,6 +109,9 @@ namespace LeaveManagement.Api.Migrations
                         .HasColumnType("text");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("EmployeeId")
+                        .IsUnique();
 
                     b.ToTable("Users");
                 });
@@ -121,9 +127,21 @@ namespace LeaveManagement.Api.Migrations
                     b.Navigation("Employee");
                 });
 
+            modelBuilder.Entity("LeaveManagement.Api.Models.User", b =>
+                {
+                    b.HasOne("LeaveManagement.Api.Models.Employee", "Employee")
+                        .WithOne("User")
+                        .HasForeignKey("LeaveManagement.Api.Models.User", "EmployeeId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Employee");
+                });
+
             modelBuilder.Entity("LeaveManagement.Api.Models.Employee", b =>
                 {
                     b.Navigation("LeaveRequests");
+
+                    b.Navigation("User");
                 });
 #pragma warning restore 612, 618
         }

@@ -19,5 +19,7 @@ namespace LeaveManagement.Api.Models
         public DateTime DateJoined { get; set; } = DateTime.UtcNow;
 
         public ICollection<LeaveRequest> LeaveRequests { get; set; } = new List<LeaveRequest>();
+
+        public User? User { get; set; }
     }
 }

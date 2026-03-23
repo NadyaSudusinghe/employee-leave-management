@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace LeaveManagement.Api.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260201201837_CreateLeaveRequestTable")]
-    partial class CreateLeaveRequestTable
+    [Migration("20260323191320_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -88,6 +88,37 @@ namespace LeaveManagement.Api.Migrations
                     b.ToTable("LeaveRequests");
                 });
 
+            modelBuilder.Entity("LeaveManagement.Api.Models.User", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int?>("EmployeeId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EmployeeId")
+                        .IsUnique();
+
+                    b.ToTable("Users");
+                });
+
             modelBuilder.Entity("LeaveManagement.Api.Models.LeaveRequest", b =>
                 {
                     b.HasOne("LeaveManagement.Api.Models.Employee", "Employee")
@@ -99,9 +130,21 @@ namespace LeaveManagement.Api.Migrations
                     b.Navigation("Employee");
                 });
 
+            modelBuilder.Entity("LeaveManagement.Api.Models.User", b =>
+                {
+                    b.HasOne("LeaveManagement.Api.Models.Employee", "Employee")
+                        .WithOne("User")
+                        .HasForeignKey("LeaveManagement.Api.Models.User", "EmployeeId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Employee");
+                });
+
             modelBuilder.Entity("LeaveManagement.Api.Models.Employee", b =>
                 {
                     b.Navigation("LeaveRequests");
+
+                    b.Navigation("User");
                 });
 #pragma warning restore 612, 618
         }

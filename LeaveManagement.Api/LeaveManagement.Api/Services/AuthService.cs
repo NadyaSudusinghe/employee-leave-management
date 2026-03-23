@@ -27,11 +27,16 @@ namespace LeaveManagement.Api.Services
 
             var passwordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password);
 
+            //auto-link to an employee if an employee exists
+            var employee = await _context.Employees
+                .FirstOrDefaultAsync(e => e.Email == dto.Email);
+
             var user = new User
             {
                 Email = dto.Email,
                 PasswordHash = passwordHash,
-                Role = dto.Role ?? Roles.User
+                Role = dto.Role ?? Roles.User,
+                EmployeeId = employee?.Id
             };
 
             _context.Users.Add(user);

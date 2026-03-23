@@ -11,5 +11,14 @@ namespace LeaveManagement.Api.Data
 
         public DbSet<LeaveRequest> LeaveRequests {  get; set; }
         public DbSet<User> Users {  get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<User>()
+                .HasOne(u => u.Employee)
+                .WithOne(e => e.User)
+                .HasForeignKey<User>(u => u.EmployeeId)
+                .OnDelete(DeleteBehavior.SetNull);
+        }
     }
 }

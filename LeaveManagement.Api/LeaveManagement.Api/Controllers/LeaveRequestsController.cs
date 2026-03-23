@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace LeaveManagement.Api.Controllers
 {
@@ -28,8 +29,16 @@ namespace LeaveManagement.Api.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
+            var role = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
+            var employeeId = GetEmployeeIdFromToken();
+
             try
             {
+                if (role != Roles.Admin)
+                {
+                    if (employeeId == null || dto.EmployeeId != employeeId)
+                        return Forbid();
+                }
                 var leaveRequest = await _leaveRequestService.CreateLeaveRequest(dto);
                 return Ok(leaveRequest);
             }
@@ -57,6 +66,12 @@ namespace LeaveManagement.Api.Controllers
             if (leaveRequest == null)
                 return NotFound();
 
+            var role = User.FindFirst(ClaimTypes.Role)?.Value;
+            var employeeId = GetEmployeeIdFromToken();
+
+            if (role != Roles.Admin && leaveRequest.EmployeeId != employeeId)
+                return Forbid();
+
             return Ok(leaveRequest);
         }
 
@@ -66,6 +81,15 @@ namespace LeaveManagement.Api.Controllers
         {
             try
             {
+                var role = User.FindFirst(ClaimTypes.Role)?.Value;
+                var tokenEmployeeId = GetEmployeeIdFromToken();
+
+                if(role != Roles.Admin)
+                {
+                    if (tokenEmployeeId == null || tokenEmployeeId != employeeId)
+                        return Forbid();
+                }
+
                 var leaveRequests = await _leaveRequestService.GetLeaveRequestsByEmployeeId(employeeId);
                 return Ok(leaveRequests);
             }
@@ -85,6 +109,15 @@ namespace LeaveManagement.Api.Controllers
 
             try
             {
+                var role = User.FindFirst(ClaimTypes.Role)?.Value;
+                var employeeId = GetEmployeeIdFromToken();
+
+                if (role != Roles.Admin)
+                {
+                    if (employeeId == null || dto.EmployeeId != employeeId)
+                        return Forbid();
+                }
+
                 var updated = await _leaveRequestService.UpdateLeaveRequest(id, dto);
                 if (!updated)
                     return NotFound();
@@ -106,6 +139,16 @@ namespace LeaveManagement.Api.Controllers
                 return NotFound();
             
             return NoContent();
+        }
+
+        private int? GetEmployeeIdFromToken()
+        {
+            var claim = User.FindFirst("employeeId")?.Value;
+
+            if (string.IsNullOrEmpty(claim))
+                return null;
+
+            return int.Parse(claim);
         }
     }
 }

@@ -5,5 +5,6 @@ namespace LeaveManagement.Api.Services.Interfaces
     public interface IUserService
     {
         Task<IEnumerable<UserReadDto>> GetAllUsers();
+        Task<bool> LinkUserToEmployee(int userId, int employeeId);
     }
 }

@@ -34,6 +34,16 @@ namespace LeaveManagement.Api.Services
             _context.Employees.Add(employee);
             await _context.SaveChangesAsync();
 
+            //auto-link with a user account, if exists
+            var user = await _context.Users
+                .FirstOrDefaultAsync(u => u.Email == dto.Email);
+
+            if (user != null && user.EmployeeId == null)
+            {
+                user.EmployeeId = employee.Id;
+                await _context.SaveChangesAsync();
+            }
+
             return new EmployeeReadDto
             {
                 Id = employee.Id,

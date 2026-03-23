@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace LeaveManagement.Api.Controllers
 {
@@ -54,6 +55,12 @@ namespace LeaveManagement.Api.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetEmployeeById(int id)
         {
+            var role = User.FindFirst(ClaimTypes.Role)?.Value;
+            var employeeId = GetEmployeeIdFromToken();
+
+            if (role != Roles.Admin && employeeId != id)
+                return Forbid();
+
             var employee = await _employeeService.GetEmployeeById(id);
 
             if (employee == null)
@@ -72,6 +79,12 @@ namespace LeaveManagement.Api.Controllers
 
             try
             {
+                var role = User.FindFirst(ClaimTypes.Role)?.Value;
+                var employeeId = GetEmployeeIdFromToken();
+
+                if (role != Roles.Admin && employeeId != id)
+                    return Forbid();
+
                 var updated = await _employeeService.UpdateEmployee(id, updateDto);
 
                 if (!updated)
@@ -96,6 +109,16 @@ namespace LeaveManagement.Api.Controllers
                 return NotFound();
 
             return NoContent();
+        }
+
+        private int? GetEmployeeIdFromToken()
+        {
+            var claim = User.FindFirst("employeeId")?.Value;
+
+            if (string.IsNullOrEmpty(claim))
+                return null;
+
+            return int.Parse(claim);
         }
     }
 }

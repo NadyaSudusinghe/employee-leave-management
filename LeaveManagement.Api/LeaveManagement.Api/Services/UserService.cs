@@ -25,5 +25,18 @@ namespace LeaveManagement.Api.Services
                 })
                 .ToListAsync();
         }
+
+        public async Task<bool> LinkUserToEmployee(int userId, int employeeId)
+        {
+            var user = await _context.Users.FindAsync(userId);
+            var employee = await _context.Employees.FindAsync(employeeId);
+
+            if(user == null ||  employee == null)
+                return false;
+
+            user.EmployeeId = employeeId;
+            await _context.SaveChangesAsync();
+            return true;
+        }
     }
 }
