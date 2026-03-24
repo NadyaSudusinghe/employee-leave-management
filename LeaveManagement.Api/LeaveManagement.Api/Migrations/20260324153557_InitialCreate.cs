@@ -37,7 +37,7 @@ namespace LeaveManagement.Api.Migrations
                     StartDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     EndDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     Reason = table.Column<string>(type: "text", nullable: false),
-                    Status = table.Column<string>(type: "text", nullable: false),
+                    Status = table.Column<int>(type: "integer", nullable: false),
                     EmployeeId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>

@@ -131,6 +131,27 @@ namespace LeaveManagement.Api.Controllers
         }
 
         [Authorize(Roles = Roles.Admin)]
+        [HttpPatch("{id}/status")]
+        public async Task<IActionResult> UpdateLeaveRequestStatus(int id, LeaveRequestStatusUpdateDto dto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            try
+            {
+                var updated = await _leaveRequestService.UpdateLeaveRequestStatus(id, dto.Status);
+                if (!updated)
+                    return NotFound("Status update unsucessfull");
+
+                return Ok("Status updated successfully!");
+            }
+            catch(InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [Authorize(Roles = Roles.Admin)]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteLeaveRequest(int id)
         {

@@ -1,4 +1,5 @@
-﻿using LeaveManagement.Api.DTOs;
+﻿using LeaveManagement.Api.Common;
+using LeaveManagement.Api.DTOs;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LeaveManagement.Api.Services.Interfaces
@@ -11,5 +12,6 @@ namespace LeaveManagement.Api.Services.Interfaces
         Task<bool> UpdateLeaveRequest(int id, LeaveRequestCreateDto dto);
         Task<bool> DeleteLeaveRequest(int id);
         Task<IEnumerable<LeaveRequestReadDto>> GetLeaveRequestsByEmployeeId(int id);
+        Task<bool> UpdateLeaveRequestStatus(int id, LeaveRequestStatus status);
     }
 }

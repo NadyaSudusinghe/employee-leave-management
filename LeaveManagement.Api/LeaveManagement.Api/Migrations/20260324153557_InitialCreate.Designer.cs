@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace LeaveManagement.Api.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260323191320_InitialCreate")]
+    [Migration("20260324153557_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -77,9 +77,8 @@ namespace LeaveManagement.Api.Migrations
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 

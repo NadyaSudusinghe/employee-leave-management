@@ -74,9 +74,8 @@ namespace LeaveManagement.Api.Migrations
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 

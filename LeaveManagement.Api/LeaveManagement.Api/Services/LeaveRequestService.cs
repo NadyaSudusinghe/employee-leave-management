@@ -1,4 +1,5 @@
-﻿using LeaveManagement.Api.Data;
+﻿using LeaveManagement.Api.Common;
+using LeaveManagement.Api.Data;
 using LeaveManagement.Api.DTOs;
 using LeaveManagement.Api.Models;
 using LeaveManagement.Api.Services.Interfaces;
@@ -28,7 +29,7 @@ namespace LeaveManagement.Api.Services
                 EndDate = dto.EndDate.ToUniversalTime(),
                 Reason = dto.Reason,
                 EmployeeId = dto.EmployeeId,
-                Status = "Pending"
+                Status = LeaveRequestStatus.Pending
             };
 
             _context.LeaveRequests.Add(leaveRequest);
@@ -134,6 +135,32 @@ namespace LeaveManagement.Api.Services
                 EmployeeId = lr.EmployeeId,
                 EmployeeName = lr.Employee.FirstName + " " + lr.Employee.LastName
             }).ToListAsync();
+        }
+
+        public async Task<bool> UpdateLeaveRequestStatus(int id, LeaveRequestStatus status)
+        {
+            var leaveRequest = await _context.LeaveRequests.FindAsync(id);
+
+            if (leaveRequest == null) 
+                return false;
+
+            //validate status
+            //var validStatuses = new[]
+            //{
+            //    LeaveRequestStatus.Pending,
+            //    LeaveRequestStatus.Approved,
+            //    LeaveRequestStatus.Rejected,
+            //};
+
+            //if (!validStatuses.Contains(status))
+            //    throw new ArgumentException("Invalid status value");
+
+            if (leaveRequest.Status != LeaveRequestStatus.Pending)
+                throw new InvalidOperationException("Only pending requests can be updated");
+
+            leaveRequest.Status = status;
+            await _context.SaveChangesAsync();
+            return true;
         }
     }
 }

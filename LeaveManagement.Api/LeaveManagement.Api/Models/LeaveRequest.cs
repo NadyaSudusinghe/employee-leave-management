@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using LeaveManagement.Api.Common;
+using System.ComponentModel.DataAnnotations;
 
 namespace LeaveManagement.Api.Models
 {
@@ -14,7 +15,7 @@ namespace LeaveManagement.Api.Models
 
         public string Reason { get; set; } = string.Empty;
 
-        public string Status { get; set; } = "Pending";
+        public LeaveRequestStatus Status { get; set; } = LeaveRequestStatus.Pending;
 
         public int EmployeeId { get; set; }
 
