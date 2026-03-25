@@ -19,29 +19,15 @@ namespace LeaveManagement.Api.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register(RegisterDto dto)
         {
-            try
-            {
-                var token = await _authService.Register(dto);
-                return Ok(token);
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            var token = await _authService.Register(dto);
+            return Ok(token);
         }
 
         [HttpPost("login")]
         public async Task<IActionResult> Login(LoginDto dto)
         {
-            try
-            {
-                var token = await _authService.Login(dto);
-                return Ok(token);
-            }
-            catch (InvalidOperationException ex)
-            { 
-                return Unauthorized(ex.Message);
-            }
+            var token = await _authService.Login(dto);
+            return Ok(token);
         }
     }
 }

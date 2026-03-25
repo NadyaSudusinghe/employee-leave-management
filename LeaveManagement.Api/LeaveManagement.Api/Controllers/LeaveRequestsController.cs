@@ -32,20 +32,13 @@ namespace LeaveManagement.Api.Controllers
             var role = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
             var employeeId = GetEmployeeIdFromToken();
 
-            try
+            if (role != Roles.Admin)
             {
-                if (role != Roles.Admin)
-                {
-                    if (employeeId == null || dto.EmployeeId != employeeId)
-                        return Forbid();
-                }
-                var leaveRequest = await _leaveRequestService.CreateLeaveRequest(dto);
-                return Ok(leaveRequest);
+                if (employeeId == null || dto.EmployeeId != employeeId)
+                    return Forbid();
             }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            var leaveRequest = await _leaveRequestService.CreateLeaveRequest(dto);
+            return Ok(leaveRequest);
         }
 
         [Authorize(Roles = Roles.Admin)]
@@ -79,25 +72,17 @@ namespace LeaveManagement.Api.Controllers
         [HttpGet("employee/{employeeId}")]
         public async Task<IActionResult> GetLeaveRequestsByEmployeeId(int employeeId)
         {
-            try
-            {
-                var role = User.FindFirst(ClaimTypes.Role)?.Value;
-                var tokenEmployeeId = GetEmployeeIdFromToken();
+            var role = User.FindFirst(ClaimTypes.Role)?.Value;
+            var tokenEmployeeId = GetEmployeeIdFromToken();
 
-                if(role != Roles.Admin)
-                {
-                    if (tokenEmployeeId == null || tokenEmployeeId != employeeId)
-                        return Forbid();
-                }
-
-                var leaveRequests = await _leaveRequestService.GetLeaveRequestsByEmployeeId(employeeId);
-                return Ok(leaveRequests);
-            }
-            catch (InvalidOperationException ex)
+            if(role != Roles.Admin)
             {
-                return BadRequest(ex.Message);
+                if (tokenEmployeeId == null || tokenEmployeeId != employeeId)
+                    return Forbid();
             }
 
+            var leaveRequests = await _leaveRequestService.GetLeaveRequestsByEmployeeId(employeeId);
+            return Ok(leaveRequests);
         }
 
         [Authorize]
@@ -107,27 +92,20 @@ namespace LeaveManagement.Api.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            try
+            var role = User.FindFirst(ClaimTypes.Role)?.Value;
+            var employeeId = GetEmployeeIdFromToken();
+
+            if (role != Roles.Admin)
             {
-                var role = User.FindFirst(ClaimTypes.Role)?.Value;
-                var employeeId = GetEmployeeIdFromToken();
-
-                if (role != Roles.Admin)
-                {
-                    if (employeeId == null || dto.EmployeeId != employeeId)
-                        return Forbid();
-                }
-
-                var updated = await _leaveRequestService.UpdateLeaveRequest(id, dto);
-                if (!updated)
-                    return NotFound();
-
-                return NoContent();
+                if (employeeId == null || dto.EmployeeId != employeeId)
+                    return Forbid();
             }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(ex.Message);
-            }
+
+            var updated = await _leaveRequestService.UpdateLeaveRequest(id, dto);
+            if (!updated)
+                return NotFound();
+
+            return NoContent();
         }
 
         [Authorize(Roles = Roles.Admin)]
@@ -137,18 +115,11 @@ namespace LeaveManagement.Api.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            try
-            {
-                var updated = await _leaveRequestService.UpdateLeaveRequestStatus(id, dto.Status);
-                if (!updated)
-                    return NotFound("Status update unsucessfull");
+            var updated = await _leaveRequestService.UpdateLeaveRequestStatus(id, dto.Status);
+            if (!updated)
+                return NotFound("Status update unsucessfull");
 
-                return Ok("Status updated successfully!");
-            }
-            catch(InvalidOperationException ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            return Ok("Status updated successfully!");
         }
 
         [Authorize(Roles = Roles.Admin)]

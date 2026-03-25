@@ -30,15 +30,8 @@ namespace LeaveManagement.Api.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            try
-            {
-                var employee = await _employeeService.CreateEmployee(employeeDto);
-                return CreatedAtAction(nameof(GetEmployeeById), new { id = employee.Id }, employee);
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            var employee = await _employeeService.CreateEmployee(employeeDto);
+            return CreatedAtAction(nameof(GetEmployeeById), new { id = employee.Id }, employee);
         }
 
         //Get all records
@@ -77,25 +70,18 @@ namespace LeaveManagement.Api.Controllers
             if(!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            try
-            {
-                var role = User.FindFirst(ClaimTypes.Role)?.Value;
-                var employeeId = GetEmployeeIdFromToken();
+            var role = User.FindFirst(ClaimTypes.Role)?.Value;
+            var employeeId = GetEmployeeIdFromToken();
 
-                if (role != Roles.Admin && employeeId != id)
+            if (role != Roles.Admin && employeeId != id)
                     return Forbid();
 
-                var updated = await _employeeService.UpdateEmployee(id, updateDto);
+            var updated = await _employeeService.UpdateEmployee(id, updateDto);
 
-                if (!updated)
+            if (!updated)
                     return NotFound();
 
-                return NoContent();
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            return NoContent();
         }
 
         //Delete Employee

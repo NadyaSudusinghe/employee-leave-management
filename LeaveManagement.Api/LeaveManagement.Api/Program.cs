@@ -1,5 +1,6 @@
 
 using LeaveManagement.Api.Data;
+using LeaveManagement.Api.Middleware;
 using LeaveManagement.Api.Services;
 using LeaveManagement.Api.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -75,6 +76,8 @@ namespace LeaveManagement.Api
 
             app.UseAuthentication();
             app.UseAuthorization();
+
+            app.UseMiddleware<ExceptionMiddleware>();
 
             app.MapControllers();
 
