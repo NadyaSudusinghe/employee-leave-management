@@ -46,6 +46,11 @@ namespace LeaveManagement.Api.Middleware
                     message = ex.Message;
                     break;
 
+                case UnauthorizedAccessException:
+                    statusCode = HttpStatusCode.Forbidden;
+                    message = ex.Message;
+                    break;
+
                 default:
                     statusCode = HttpStatusCode.BadRequest;
                     message = "An unexpected error occurred.";

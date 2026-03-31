@@ -22,7 +22,7 @@ namespace LeaveManagement.Api.Controllers
             _leaveRequestService = leaveRequestService;
         }
 
-        [Authorize]
+        [Authorize(Roles = Roles.User)]
         [HttpPost]
         public async Task<IActionResult> CreateLeaveRequest(LeaveRequestCreateDto dto)
         {
@@ -32,13 +32,21 @@ namespace LeaveManagement.Api.Controllers
             var role = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
             var employeeId = GetEmployeeIdFromToken();
 
-            if (role != Roles.Admin)
+            //if (role != Roles.Admin)
+            //{
+            //    if (employeeId == null)
+            //        return Forbid();
+            //}
+
+            if(employeeId  != null)
             {
-                if (employeeId == null || dto.EmployeeId != employeeId)
-                    return Forbid();
+                var leaveRequest = await _leaveRequestService.CreateLeaveRequest(dto, (int)employeeId);
+                return Ok(leaveRequest);
             }
-            var leaveRequest = await _leaveRequestService.CreateLeaveRequest(dto);
-            return Ok(leaveRequest);
+            else
+            {
+                return Forbid();
+            }
         }
 
         [Authorize(Roles = Roles.Admin)]
@@ -85,7 +93,7 @@ namespace LeaveManagement.Api.Controllers
             return Ok(leaveRequests);
         }
 
-        [Authorize]
+        [Authorize(Roles = Roles.User)]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateLeaveRequest(int id, LeaveRequestCreateDto dto)
         {
@@ -95,16 +103,23 @@ namespace LeaveManagement.Api.Controllers
             var role = User.FindFirst(ClaimTypes.Role)?.Value;
             var employeeId = GetEmployeeIdFromToken();
 
-            if (role != Roles.Admin)
+            //if (role != Roles.Admin)
+            //{
+            //    if (employeeId == null)
+            //        return Forbid();
+            //}
+
+            if(employeeId != null)
             {
-                if (employeeId == null || dto.EmployeeId != employeeId)
-                    return Forbid();
+                var updated = await _leaveRequestService.UpdateLeaveRequest(id, dto, (int)employeeId);
+                if (!updated)
+                    return NotFound();
             }
-
-            var updated = await _leaveRequestService.UpdateLeaveRequest(id, dto);
-            if (!updated)
-                return NotFound();
-
+            else
+            {
+                return Forbid();
+            }
+            
             return NoContent();
         }
 

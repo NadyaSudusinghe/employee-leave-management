@@ -16,9 +16,9 @@ namespace LeaveManagement.Api.Services
             _context = context;
         }
 
-        public async Task<LeaveRequestReadDto> CreateLeaveRequest(LeaveRequestCreateDto dto)
+        public async Task<LeaveRequestReadDto> CreateLeaveRequest(LeaveRequestCreateDto dto, int employeeId)
         {
-            var employee = await _context.Employees.FindAsync(dto.EmployeeId);
+            var employee = await _context.Employees.FindAsync(employeeId);
 
             if (employee == null)
                 throw new InvalidOperationException("Employee does not Exist.");
@@ -28,7 +28,7 @@ namespace LeaveManagement.Api.Services
                 StartDate = dto.StartDate.ToUniversalTime(),
                 EndDate = dto.EndDate.ToUniversalTime(),
                 Reason = dto.Reason,
-                EmployeeId = dto.EmployeeId,
+                EmployeeId = employeeId,
                 Status = LeaveRequestStatus.Pending
             };
 
@@ -82,7 +82,7 @@ namespace LeaveManagement.Api.Services
             };
         }
 
-        public async Task<bool> UpdateLeaveRequest(int id, LeaveRequestCreateDto dto)
+        public async Task<bool> UpdateLeaveRequest(int id, LeaveRequestCreateDto dto, int employeeId)
         {
             var leaveRequest = await _context.LeaveRequests.FindAsync(id);
 
@@ -90,15 +90,18 @@ namespace LeaveManagement.Api.Services
                 return false;
 
             //check if employee exists as well.
-            var employeeExists = await _context.Employees.AnyAsync(e => e.Id == dto.EmployeeId);
+            var employeeExists = await _context.Employees.AnyAsync(e => e.Id == employeeId);
 
             if (!employeeExists)
                 throw new InvalidOperationException("Employee does not exist.");
 
+            if (employeeId != leaveRequest.EmployeeId)
+                throw new UnauthorizedAccessException("You cannot modify this leave request");
+
             leaveRequest.StartDate = dto.StartDate.ToUniversalTime();
             leaveRequest.EndDate = dto.EndDate.ToUniversalTime();
             leaveRequest.Reason = dto.Reason;
-            leaveRequest.EmployeeId = dto.EmployeeId;
+            leaveRequest.EmployeeId = employeeId;
 
             await _context.SaveChangesAsync();
 

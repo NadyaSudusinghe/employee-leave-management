@@ -14,7 +14,7 @@ namespace LeaveManagement.Api.DTOs
         [MaxLength(200, ErrorMessage = "Reason cannot exceed 200 characters.")]
         public string Reason { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "EmployeeId is required.")]
-        public int EmployeeId { get; set; }
+        //[Required(ErrorMessage = "EmployeeId is required.")]
+        //public int EmployeeId { get; set; }
     }
 }
