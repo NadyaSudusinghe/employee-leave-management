@@ -29,7 +29,8 @@ namespace LeaveManagement.Api.Services
                 EndDate = dto.EndDate.ToUniversalTime(),
                 Reason = dto.Reason,
                 EmployeeId = employeeId,
-                Status = LeaveRequestStatus.Pending
+                Status = LeaveRequestStatus.Pending,
+                LeaveType = dto.LeaveType!.Value
             };
 
             _context.LeaveRequests.Add(leaveRequest);
@@ -40,8 +41,9 @@ namespace LeaveManagement.Api.Services
                 Id = leaveRequest.Id,
                 StartDate = leaveRequest.StartDate,
                 EndDate = leaveRequest.EndDate,
-                Reason = leaveRequest.Reason,
+                Reason = leaveRequest.Reason ?? string.Empty,
                 Status = leaveRequest.Status,
+                LeaveType = leaveRequest.LeaveType,
                 EmployeeId = leaveRequest.EmployeeId,
                 EmployeeName = employee.FirstName + " " + employee.LastName
             };
@@ -56,8 +58,9 @@ namespace LeaveManagement.Api.Services
                 Id = lr.Id,
                 StartDate = lr.StartDate,
                 EndDate = lr.EndDate,
-                Reason = lr.Reason,
+                Reason = lr.Reason ?? string.Empty,
                 Status = lr.Status,
+                LeaveType = lr.LeaveType,
                 EmployeeId = lr.EmployeeId,
                 EmployeeName = lr.Employee.FirstName + " " + lr.Employee.LastName
             }).ToListAsync();
@@ -75,8 +78,9 @@ namespace LeaveManagement.Api.Services
                 Id = leaveRequest.Id,
                 StartDate = leaveRequest.StartDate,
                 EndDate = leaveRequest.EndDate,
-                Reason = leaveRequest.Reason,
+                Reason = leaveRequest.Reason ?? string.Empty,
                 Status = leaveRequest.Status,
+                LeaveType = leaveRequest.LeaveType,
                 EmployeeId = leaveRequest.EmployeeId,
                 EmployeeName = leaveRequest.Employee.FirstName + " " + leaveRequest.Employee.LastName
             };
@@ -101,7 +105,7 @@ namespace LeaveManagement.Api.Services
             leaveRequest.StartDate = dto.StartDate.ToUniversalTime();
             leaveRequest.EndDate = dto.EndDate.ToUniversalTime();
             leaveRequest.Reason = dto.Reason;
-            leaveRequest.EmployeeId = employeeId;
+            leaveRequest.LeaveType = dto.LeaveType!.Value;
 
             await _context.SaveChangesAsync();
 
@@ -133,8 +137,9 @@ namespace LeaveManagement.Api.Services
                 Id = lr.Id,
                 StartDate = lr.StartDate,
                 EndDate = lr.EndDate,
-                Reason = lr.Reason,
+                Reason = lr.Reason ?? string.Empty,
                 Status = lr.Status,
+                LeaveType = lr.LeaveType,
                 EmployeeId = lr.EmployeeId,
                 EmployeeName = lr.Employee.FirstName + " " + lr.Employee.LastName
             }).ToListAsync();

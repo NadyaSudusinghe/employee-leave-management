@@ -13,7 +13,10 @@ namespace LeaveManagement.Api.Models
         [Required]
         public DateTime EndDate { get; set; }
 
-        public string Reason { get; set; } = string.Empty;
+        [Required]
+        public LeaveType LeaveType { get; set; }
+
+        public string? Reason { get; set; }
 
         public LeaveRequestStatus Status { get; set; } = LeaveRequestStatus.Pending;
 

@@ -8,6 +8,7 @@ namespace LeaveManagement.Api.DTOs
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public string Reason { get; set; } = string.Empty;
+        public LeaveType LeaveType { get; set; } = LeaveType.Casual;
         public LeaveRequestStatus Status {  get; set; } = LeaveRequestStatus.Pending;
         public int EmployeeId { get; set; }
         public string EmployeeName { get; set; } = string.Empty;
