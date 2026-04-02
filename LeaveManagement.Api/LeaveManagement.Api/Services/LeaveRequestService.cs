@@ -23,6 +23,8 @@ namespace LeaveManagement.Api.Services
             if (employee == null)
                 throw new InvalidOperationException("Employee does not Exist.");
 
+            var count = employee.LeaveRequests.Count();
+
             var leaveRequest = new LeaveRequest
             {
                 StartDate = dto.StartDate.ToUniversalTime(),
@@ -169,6 +171,33 @@ namespace LeaveManagement.Api.Services
             leaveRequest.Status = status;
             await _context.SaveChangesAsync();
             return true;
+        }
+
+        public async Task<LeaveBalanceDto> GetLeaveBalance(int employeeId)
+        {
+            var employee = await _context.Employees.FindAsync(employeeId);
+
+            if (employee == null)
+                throw new InvalidOperationException("Employee does not exist.");
+
+            var approvedRequests = await _context.LeaveRequests
+                .Where(lr => lr.EmployeeId == employeeId && lr.Status == LeaveRequestStatus.Approved).ToListAsync();
+
+            int annualUsed = approvedRequests.Where(lr => lr.LeaveType == LeaveType.Annual)
+                .Sum(lr => (lr.EndDate.Date - lr.StartDate.Date).Days + 1);
+
+            int casualUsed = approvedRequests.Where(lr => lr.LeaveType == LeaveType.Casual)
+                .Sum(lr => (lr.EndDate.Date - lr.StartDate.Date).Days + 1);
+
+            return new LeaveBalanceDto
+            {
+                EmployeeId = employeeId,
+                EmployeeName = employee.FirstName + " " + employee.LastName,
+                AnnualLeaveUsed = annualUsed,
+                AnnualLeaveRemaining = LeaveLimit.AnnualLeaveLimit - annualUsed,
+                CasualLeaveUsed = casualUsed,
+                CasualLeaveRemaining = LeaveLimit.CasualLeaveLimit - casualUsed
+            };
         }
     }
 }

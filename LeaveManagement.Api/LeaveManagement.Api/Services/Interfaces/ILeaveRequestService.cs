@@ -13,5 +13,6 @@ namespace LeaveManagement.Api.Services.Interfaces
         Task<bool> DeleteLeaveRequest(int id);
         Task<IEnumerable<LeaveRequestReadDto>> GetLeaveRequestsByEmployeeId(int id);
         Task<bool> UpdateLeaveRequestStatus(int id, LeaveRequestStatus status);
+        Task<LeaveBalanceDto> GetLeaveBalance(int employeeId);
     }
 }

@@ -148,6 +148,20 @@ namespace LeaveManagement.Api.Controllers
             return NoContent();
         }
 
+        [Authorize]
+        [HttpGet("employee/{employeeId}/balance")]
+        public async Task<ActionResult<LeaveBalanceDto>> GetLeaveBalance(int employeeId)
+        {
+            var currentEmployeeId = GetEmployeeIdFromToken();
+            var role = User.FindFirst(ClaimTypes.Role)?.Value;
+
+            if (role != Roles.Admin && currentEmployeeId != employeeId)
+                return Forbid();
+
+            var balance = await _leaveRequestService.GetLeaveBalance(employeeId);
+            return Ok(balance);
+        }
+
         private int? GetEmployeeIdFromToken()
         {
             var claim = User.FindFirst("employeeId")?.Value;
