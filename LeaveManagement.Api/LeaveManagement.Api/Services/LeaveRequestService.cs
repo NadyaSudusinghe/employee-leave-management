@@ -23,7 +23,7 @@ namespace LeaveManagement.Api.Services
             if (employee == null)
                 throw new InvalidOperationException("Employee does not Exist.");
 
-            var count = employee.LeaveRequests.Count();
+            await ValidateLeaveBalance(employeeId, dto);
 
             var leaveRequest = new LeaveRequest
             {
@@ -104,6 +104,8 @@ namespace LeaveManagement.Api.Services
             if (employeeId != leaveRequest.EmployeeId)
                 throw new UnauthorizedAccessException("You cannot modify this leave request");
 
+            await ValidateLeaveBalance(employeeId, dto, id);
+
             leaveRequest.StartDate = dto.StartDate.ToUniversalTime();
             leaveRequest.EndDate = dto.EndDate.ToUniversalTime();
             leaveRequest.Reason = dto.Reason;
@@ -168,6 +170,15 @@ namespace LeaveManagement.Api.Services
             if (leaveRequest.Status != LeaveRequestStatus.Pending)
                 throw new InvalidOperationException("Only pending requests can be updated");
 
+            var pendingLeaveRequest = new LeaveRequestCreateDto
+            {
+                StartDate = leaveRequest.StartDate,
+                EndDate = leaveRequest.EndDate,
+                LeaveType = leaveRequest.LeaveType,
+            };
+
+            await ValidateLeaveBalance(leaveRequest.EmployeeId, pendingLeaveRequest, id);
+
             leaveRequest.Status = status;
             await _context.SaveChangesAsync();
             return true;
@@ -198,6 +209,41 @@ namespace LeaveManagement.Api.Services
                 CasualLeaveUsed = casualUsed,
                 CasualLeaveRemaining = LeaveLimit.CasualLeaveLimit - casualUsed
             };
+        }
+
+        private async Task ValidateLeaveBalance(int employeeId, LeaveRequestCreateDto dto, int? leaveRequestId = null)
+        {
+            if (dto.LeaveType == LeaveType.SickLeave)
+                return;
+
+            int requestedDays = (dto.EndDate.Date -  dto.StartDate.Date).Days + 1;
+
+            var approvedRequests = await _context.LeaveRequests
+                .Where(lr => lr.EmployeeId == employeeId
+                && lr.Status == LeaveRequestStatus.Approved
+                && lr.LeaveType == dto.LeaveType)
+                .ToListAsync();
+
+            //In case of updating an existing leave request
+            if(leaveRequestId.HasValue)
+            {
+                approvedRequests = approvedRequests
+                    .Where(lr => lr.Id != leaveRequestId.Value).ToList();
+            }
+
+            int alreadyUsedLeaves = approvedRequests.Sum(lr => (lr.EndDate.Date - lr.StartDate.Date).Days + 1);
+
+            switch (dto.LeaveType)
+            {
+                case LeaveType.Annual:
+                    if (alreadyUsedLeaves + requestedDays > LeaveLimit.AnnualLeaveLimit)
+                        throw new InvalidOperationException("Insufficient annual leave balance. " + $"Requested: {requestedDays} day(s), Remaining: {LeaveLimit.AnnualLeaveLimit - alreadyUsedLeaves} day(s).");
+                    break;
+                case LeaveType.Casual:
+                    if (alreadyUsedLeaves + requestedDays > LeaveLimit.CasualLeaveLimit)
+                        throw new InvalidOperationException("Insufficient casual leave balance. " + $"Requested: {requestedDays} day(s), Remaining: {LeaveLimit.CasualLeaveLimit - alreadyUsedLeaves} day(s).");
+                    break;
+            }
         }
     }
 }
