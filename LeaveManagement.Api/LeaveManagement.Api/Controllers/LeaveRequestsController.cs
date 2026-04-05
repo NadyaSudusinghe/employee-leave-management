@@ -38,7 +38,7 @@ namespace LeaveManagement.Api.Controllers
             //        return Forbid();
             //}
 
-            if(employeeId  != null)
+            if (employeeId != null)
             {
                 var leaveRequest = await _leaveRequestService.CreateLeaveRequest(dto, (int)employeeId);
                 return Ok(leaveRequest);
@@ -51,8 +51,14 @@ namespace LeaveManagement.Api.Controllers
 
         [Authorize(Roles = Roles.Admin)]
         [HttpGet]
-        public async Task<IActionResult> GetAllLeaveRequests()
+        public async Task<IActionResult> GetAllLeaveRequests([FromQuery] LeaveRequestStatus? status)
         {
+            if (status.HasValue)
+            {
+                var filtered = await _leaveRequestService.GetLeaveRequestsByStatus(status.Value);
+                return Ok(filtered);
+            }
+
             var leaveRequests = await _leaveRequestService.GetAllLeaveRequests();
 
             return Ok(leaveRequests);
@@ -83,7 +89,7 @@ namespace LeaveManagement.Api.Controllers
             var role = User.FindFirst(ClaimTypes.Role)?.Value;
             var tokenEmployeeId = GetEmployeeIdFromToken();
 
-            if(role != Roles.Admin)
+            if (role != Roles.Admin)
             {
                 if (tokenEmployeeId == null || tokenEmployeeId != employeeId)
                     return Forbid();
@@ -109,7 +115,7 @@ namespace LeaveManagement.Api.Controllers
             //        return Forbid();
             //}
 
-            if(employeeId != null)
+            if (employeeId != null)
             {
                 var updated = await _leaveRequestService.UpdateLeaveRequest(id, dto, (int)employeeId);
                 if (!updated)
@@ -119,7 +125,7 @@ namespace LeaveManagement.Api.Controllers
             {
                 return Forbid();
             }
-            
+
             return NoContent();
         }
 
@@ -144,7 +150,7 @@ namespace LeaveManagement.Api.Controllers
             var deleted = await _leaveRequestService.DeleteLeaveRequest(id);
             if (!deleted)
                 return NotFound();
-            
+
             return NoContent();
         }
 

@@ -184,6 +184,21 @@ namespace LeaveManagement.Api.Services
             return true;
         }
 
+        public async Task<IEnumerable<LeaveRequestReadDto>> GetLeaveRequestsByStatus(LeaveRequestStatus status)
+        {
+            return await _context.LeaveRequests.Include(lr => lr.Employee).Where(lr => lr.Status == status).Select(lr => new LeaveRequestReadDto
+            {
+                Id = lr.Id,
+                StartDate = lr.StartDate,
+                EndDate = lr.EndDate,
+                LeaveType = lr.LeaveType,
+                Reason = lr.Reason ?? string.Empty,
+                Status = lr.Status,
+                EmployeeId = lr.EmployeeId,
+                EmployeeName = lr.Employee.FirstName + " " + lr.Employee.LastName
+            }).ToListAsync();
+        }
+
         public async Task<LeaveBalanceDto> GetLeaveBalance(int employeeId)
         {
             var employee = await _context.Employees.FindAsync(employeeId);
