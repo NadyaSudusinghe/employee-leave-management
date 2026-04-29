@@ -37,9 +37,9 @@ namespace LeaveManagement.Api.Controllers
         //Get all records
         [Authorize(Roles = Roles.Admin)]
         [HttpGet]
-        public async Task<IActionResult> GetAllEmployees()
+        public async Task<IActionResult> GetAllEmployees([FromQuery] PaginationParams pagination)
         {
-            var employees = await _employeeService.GetAllEmployees();
+            var employees = await _employeeService.GetAllEmployees(pagination);
             return Ok(employees);
         }
 

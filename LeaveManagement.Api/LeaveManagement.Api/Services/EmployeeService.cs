@@ -54,9 +54,12 @@ namespace LeaveManagement.Api.Services
             };
         }
 
-        public async Task<IEnumerable<EmployeeReadDto>> GetAllEmployees()
+        public async Task<IEnumerable<EmployeeReadDto>> GetAllEmployees(PaginationParams pagination)
         {
             return await _context.Employees
+                .OrderByDescending(e => e.DateJoined)
+                .Skip((pagination.Page - 1) * pagination.PageSize)
+                .Take(pagination.PageSize)
                 .Select(e => new EmployeeReadDto
                 {
                     Id = e.Id,

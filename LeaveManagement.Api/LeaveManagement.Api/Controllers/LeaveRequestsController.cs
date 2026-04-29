@@ -51,16 +51,9 @@ namespace LeaveManagement.Api.Controllers
 
         [Authorize(Roles = Roles.Admin)]
         [HttpGet]
-        public async Task<IActionResult> GetAllLeaveRequests([FromQuery] LeaveRequestStatus? status)
+        public async Task<IActionResult> GetAllLeaveRequests([FromQuery] LeaveRequestStatus? status, [FromQuery] PaginationParams pagination)
         {
-            if (status.HasValue)
-            {
-                var filtered = await _leaveRequestService.GetLeaveRequestsByStatus(status.Value);
-                return Ok(filtered);
-            }
-
-            var leaveRequests = await _leaveRequestService.GetAllLeaveRequests();
-
+            var leaveRequests = await _leaveRequestService.GetAllLeaveRequests(status, pagination);
             return Ok(leaveRequests);
         }
 
@@ -84,7 +77,7 @@ namespace LeaveManagement.Api.Controllers
 
         [Authorize]
         [HttpGet("employee/{employeeId}")]
-        public async Task<IActionResult> GetLeaveRequestsByEmployeeId(int employeeId)
+        public async Task<IActionResult> GetLeaveRequestsByEmployeeId(int employeeId, [FromQuery] PaginationParams pagination)
         {
             var role = User.FindFirst(ClaimTypes.Role)?.Value;
             var tokenEmployeeId = GetEmployeeIdFromToken();
@@ -95,7 +88,7 @@ namespace LeaveManagement.Api.Controllers
                     return Forbid();
             }
 
-            var leaveRequests = await _leaveRequestService.GetLeaveRequestsByEmployeeId(employeeId);
+            var leaveRequests = await _leaveRequestService.GetLeaveRequestsByEmployeeId(employeeId, pagination);
             return Ok(leaveRequests);
         }
 

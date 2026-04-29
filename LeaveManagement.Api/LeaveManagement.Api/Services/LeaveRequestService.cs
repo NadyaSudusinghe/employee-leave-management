@@ -52,10 +52,18 @@ namespace LeaveManagement.Api.Services
 
         }
 
-        public async Task<IEnumerable<LeaveRequestReadDto>> GetAllLeaveRequests()
+        public async Task<IEnumerable<LeaveRequestReadDto>> GetAllLeaveRequests(LeaveRequestStatus? status, PaginationParams pagination)
         {
+            var query = _context.LeaveRequests.Include(lr => lr.Employee).AsQueryable();
 
-            return await _context.LeaveRequests.Include(lr=> lr.Employee).Select(lr => new LeaveRequestReadDto
+            if (status.HasValue)
+                query = query.Where(lr => lr.Status == status.Value);
+
+            return await query
+                .OrderByDescending(lr => lr.StartDate)
+                .Skip((pagination.Page - 1) * pagination.PageSize)
+                .Take(pagination.PageSize)
+                .Select(lr => new LeaveRequestReadDto
             {
                 Id = lr.Id,
                 StartDate = lr.StartDate,
@@ -129,14 +137,18 @@ namespace LeaveManagement.Api.Services
             return true;
         }
 
-        public async Task<IEnumerable<LeaveRequestReadDto>> GetLeaveRequestsByEmployeeId(int employeeId)
+        public async Task<IEnumerable<LeaveRequestReadDto>> GetLeaveRequestsByEmployeeId(int employeeId, PaginationParams pagination)
         {
             var employeeExists = await _context.Employees.AnyAsync(e => e.Id == employeeId);
 
             if (!employeeExists)
                 throw new InvalidOperationException("Employee does not Exist.");
 
-            return await _context.LeaveRequests.Where(lr => lr.EmployeeId == employeeId).Include(lr => lr.Employee).Select(lr => new LeaveRequestReadDto
+            return await _context.LeaveRequests.Where(lr => lr.EmployeeId == employeeId).Include(lr => lr.Employee)
+                .OrderByDescending(lr => lr.StartDate)
+                .Skip((pagination.Page - 1) * pagination.PageSize)
+                .Take(pagination.PageSize)
+                .Select(lr => new LeaveRequestReadDto
             {
                 Id = lr.Id,
                 StartDate = lr.StartDate,
@@ -182,21 +194,6 @@ namespace LeaveManagement.Api.Services
             leaveRequest.Status = status;
             await _context.SaveChangesAsync();
             return true;
-        }
-
-        public async Task<IEnumerable<LeaveRequestReadDto>> GetLeaveRequestsByStatus(LeaveRequestStatus status)
-        {
-            return await _context.LeaveRequests.Include(lr => lr.Employee).Where(lr => lr.Status == status).Select(lr => new LeaveRequestReadDto
-            {
-                Id = lr.Id,
-                StartDate = lr.StartDate,
-                EndDate = lr.EndDate,
-                LeaveType = lr.LeaveType,
-                Reason = lr.Reason ?? string.Empty,
-                Status = lr.Status,
-                EmployeeId = lr.EmployeeId,
-                EmployeeName = lr.Employee.FirstName + " " + lr.Employee.LastName
-            }).ToListAsync();
         }
 
         public async Task<LeaveBalanceDto> GetLeaveBalance(int employeeId)
