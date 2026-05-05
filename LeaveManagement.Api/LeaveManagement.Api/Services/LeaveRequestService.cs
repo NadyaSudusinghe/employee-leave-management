@@ -52,17 +52,23 @@ namespace LeaveManagement.Api.Services
 
         }
 
-        public async Task<IEnumerable<LeaveRequestReadDto>> GetAllLeaveRequests(LeaveRequestStatus? status, PaginationParams pagination)
+        public async Task<IEnumerable<LeaveRequestReadDto>> GetAllLeaveRequests(LeaveRequestQueryParams queryParams)
         {
             var query = _context.LeaveRequests.Include(lr => lr.Employee).AsQueryable();
 
-            if (status.HasValue)
-                query = query.Where(lr => lr.Status == status.Value);
+            if (queryParams.EmployeeId.HasValue)
+                query = query.Where(lr => lr.EmployeeId == queryParams.EmployeeId.Value);
+
+            if (queryParams.Status.HasValue)
+                query = query.Where(lr => lr.Status == queryParams.Status.Value);
+
+            if (queryParams.LeaveType.HasValue)
+                query = query.Where(lr => lr.LeaveType == queryParams.LeaveType.Value);
 
             return await query
                 .OrderByDescending(lr => lr.StartDate)
-                .Skip((pagination.Page - 1) * pagination.PageSize)
-                .Take(pagination.PageSize)
+                .Skip((queryParams.Page - 1) * queryParams.PageSize)
+                .Take(queryParams.PageSize)
                 .Select(lr => new LeaveRequestReadDto
             {
                 Id = lr.Id,

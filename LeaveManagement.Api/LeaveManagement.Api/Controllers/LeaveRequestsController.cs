@@ -51,9 +51,9 @@ namespace LeaveManagement.Api.Controllers
 
         [Authorize(Roles = Roles.Admin)]
         [HttpGet]
-        public async Task<IActionResult> GetAllLeaveRequests([FromQuery] LeaveRequestStatus? status, [FromQuery] PaginationParams pagination)
+        public async Task<IActionResult> GetAllLeaveRequests([FromQuery] LeaveRequestQueryParams query)
         {
-            var leaveRequests = await _leaveRequestService.GetAllLeaveRequests(status, pagination);
+            var leaveRequests = await _leaveRequestService.GetAllLeaveRequests(query);
             return Ok(leaveRequests);
         }
 
